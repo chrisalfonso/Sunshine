@@ -30,12 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.transform.Result;
-
 /**
  * Fragment importing weather data
  */
 public class ForecastFragment extends Fragment {
+
+    // make the ArrayAdapter a global variable so that it's accessible within FetchWeatherTask
+    private ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -60,7 +61,7 @@ public class ForecastFragment extends Fragment {
         // Handle item selection. Get notified when menu item is selected.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
+            FetchWeatherTask weatherTask = new FetchWeatherTask(); //create AsyncTask
             weatherTask.execute("94043");
             return true;
         }
@@ -96,7 +97,7 @@ public class ForecastFragment extends Fragment {
 
         // Initialize the Adapter
         // Android docs list only 3 required arguments for this constructor. Katherine also includes "ID of textview"
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(), // this fragment's parent activity
                 R.layout.list_item_forecast, // ID of layout
                 R.id.list_item_forecast_textview, // ID of view to populate
@@ -106,7 +107,7 @@ public class ForecastFragment extends Fragment {
         // Bind the Adapter to ListView
         // getView() returns the root view of the fragment
         ListView forecastList = (ListView) rootView.findViewById(R.id.listview_forecast);
-        forecastList.setAdapter(adapter);
+        forecastList.setAdapter(mForecastAdapter);
 
         return rootView;
     }
@@ -281,8 +282,8 @@ public class ForecastFragment extends Fragment {
                 forecastJsonStr = buffer.toString();
 
                 // check to see if we're getting any data
-                Log.v(LOG_TAG, "Built Uri:  " + url); // view the API
-                Log.v(LOG_TAG, "Forecast string: " + forecastJsonStr); // view the JSON object
+                //Log.v(LOG_TAG, "Built Uri:  " + url); // view the API
+                //Log.v(LOG_TAG, "Forecast string: " + forecastJsonStr); // view the JSON object
 
                 // Parse JSON data
 
@@ -315,9 +316,14 @@ public class ForecastFragment extends Fragment {
             return null;
         }
 
-        protected void onPostExecute(Result result) {
-            // do something!
-            // ...don't know what to do yet...
+        protected void onPostExecute(String[] result) { // need more info on how this works
+            if (result != null) {
+                mForecastAdapter.clear();
+                for (String dayForecastStr : result) { // a for-each loop; use is preferred over while-loop using counter
+                    mForecastAdapter.add(dayForecastStr);
+                }
+            }
+            // return string array of weather forecast
         }
     }
 }
